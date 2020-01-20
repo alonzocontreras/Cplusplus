@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <queue> 
+#include <list>
 using namespace std;
 
 int bankHours = 12;  //bank is open for 12 hours
@@ -28,25 +29,51 @@ class Customer {
 };
 
 class Teller {
-  int idleTime;
+  int timeWorked, idleTime, tellerID;
 
   public:
-    void set_values(int x){
+    void updateTimeWorked(){ //keep track how much each teller gets paid
+      timeWorked++;
+    }
+
+    void setIdleTime(int x){//keep track how much time a teller goes inactive
       idleTime = x;
     }
 
-    int getIdleTime(){
-      return idleTime;
+    int getTotalTimeWorked(){
+      return timeWorked;
+    }
+
+    void setTellerID(int x){
+      tellerID = x;
+    }
+
+    int getTellerID(){
+      return tellerID;
+    }
+};
+
+class Transaction {
+  int customerTransactionTime, tellerWorkTime, tellerID;
+
+  public:
+    void setTransactionTime (int x, int y, int z){
+      customerTransactionTime = x;
+      tellerWorkTime = y;
+      tellerID = z;
     }
 };
 
 int main ()
 {
-  vector<Customer> customerLine; //max of 20
+  queue<Customer> customerLine; //max of 20
   queue<Teller> tellerLine; //max of 5 
+  list<Teller> tellerInactive;
   Teller startTeller; //first teller starts with idle of 0
-  startTeller.set_values(0);
+  startTeller.updateTimeWorked();
+  startTeller.setTellerID(1);
   tellerLine.push(startTeller);
+  queue<Transaction> activeTransaction; //push teller and customer for transaction
 
   cout << "\n----------The Bank is now open-----------" << endl;
 
@@ -70,39 +97,53 @@ int main ()
           Customer newCustomer; //new customer object
           //cout << "time to help customer: " << customerHelpTime << endl;
           newCustomer.set_values(customerHelpTime);
-          customerLine.push_back(newCustomer);
+          customerLine.push(newCustomer);
     }
 
     cout << "number of customers in line: " << customerLine.size() << endl;
 
     //push new teller object into array with time stamp for teller
-    if(customerLine.size() > 16 && tellersActive < 5){
+    if(customerLine.size() > 16 && tellersActive == 4){
       Teller newTeller;
       //cout << "--> Teller idleTime: " << clock() << endl;
-      newTeller.set_values(clock());
+      newTeller.updateTimeWorked();
+      newTeller.setTellerID(5);
       tellerLine.push(newTeller);
       tellersActive++;
-    } 
-    // else if (customerLine.size() > 12 && tellersActive < 5){
-    //   Teller newTeller;
-    //   newTeller.set_values(clock());
-    //   tellerLine.push(newTeller);
-    //   tellersActive++;
-    // } else if (customerLine.size() > 8 && tellersActive < 5){
-    //   Teller newTeller;
-    //   newTeller.set_values(clock());
-    //   tellerLine.push(newTeller);
-    //   tellersActive++;
-    // } else if (customerLine.size() > 4 && tellersActive < 5){
-    //   Teller newTeller;
-    //   newTeller.set_values(clock());
-    //   tellerLine.push(newTeller);
-    //   tellersActive++;
-    // }
+    } else if (customerLine.size() > 12 && tellersActive == 3){
+      Teller newTeller;
+      newTeller.updateTimeWorked();
+      newTeller.setTellerID(4);
+      tellerLine.push(newTeller);
+      tellersActive++;
+    } else if (customerLine.size() > 8 && tellersActive == 2){
+      Teller newTeller;
+      newTeller.updateTimeWorked();
+      newTeller.setTellerID(3);
+      tellerLine.push(newTeller);
+      tellersActive++;
+    } else if (customerLine.size() > 4 && tellersActive == 1){
+      Teller newTeller;
+      newTeller.updateTimeWorked();
+      newTeller.setTellerID(2);
+      tellerLine.push(newTeller);
+      tellersActive++;
+    }
 
     cout << "There are " << tellerLine.size() << " tellers active" << endl;
 
     //get the teller with the longest wait time
+    if(customerLine.size() > 1){
+      Transaction transaction;
+      transaction.setTransactionTime(customerLine.front().getTime(), tellerLine.front().getTotalTimeWorked(), tellerLine.front().getTellerID());
+      cout << "TellerID: " << tellerLine.front().getTellerID() << endl;
+      if (tellerLine.size() > 1) {
+        tellerLine.pop();
+      }
+      customerLine.pop();
+    }
+    
+    //transaction.push();
     
     //said teller will pull the next customer from customerLine array
 
