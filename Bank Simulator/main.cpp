@@ -6,7 +6,7 @@
 #include <list>
 using namespace std;
 
-int bankHours = 12;  //bank is open for 12 hours
+int bankHours = 12;  //bank is open for 12 hours (idea, set time to 8 hours and extend to finish helping last remaining customers)
 int numOfNewCustomers, //num of customer arriving 0-3 customer/sec
 customerHelpTime; //amount of time each customer takes with the teller 1-2sec
 int currentTime = 7; //bank opens at 7:00am
@@ -138,27 +138,26 @@ void activateTeller(){
 
 void initializeTransaction(){
   //get the teller with the longest wait time
-  for(int i = 0; i < tellerLine.size() + 1; i++){
+  for(int i = 0; i < tellerLine.size(); i++){
     if(customerLine.size() >= 1){
       Transaction transaction;
       //set the transaction with (customerTransactionLength, tellerTotalWorkHours, tellerID)
       transaction.setTransactionTime(customerLine.front().getTime(), tellerLine.front().getTotalTimeWorked(), tellerLine.front().getTellerID());
       transactID++;
       transaction.setTransactionID(transactID);
-
-      //always have at least 1 active teller
-      if (tellerLine.size() > 0 ) {
-        tellerLine.pop();
-      }
       customerLine.pop();
-      cout << "customer is being helped by teller\nnumber of customers in line: " << customerLine.size() << endl;
+      cout << "customer is being helped by tellerID: " << tellerLine.front().getTellerID()<< "\nnumber of customers in line: " << customerLine.size() << endl;
+      tellerLine.pop();
+      // if (tellerLine.size() > 0 ) {
+      //   tellerLine.pop();
+      // }
       activeTransaction.push_back(transaction);
     } 
   }
 }
 
 void startTransaction(){
-  for (auto iter = activeTransaction.begin(); iter != activeTransaction.end();){    
+  for (auto iter = activeTransaction.begin(); iter != activeTransaction.end(); iter++){    
     //deincrement transactionTimes and increment tellerWorkTime
     cout << "transactionID: " << iter->getTransactionID() << " transaction time: " << iter->getTransactionTime() << endl;
     iter->updateTransactionTime();
@@ -224,5 +223,5 @@ int main ()
 //teller will handle the first 4 then any after that will be adding a new teller to manage money
 
 //NOTES TO SELF
-// make sure that tellers are being held up by a certain amount of time due to customer transaction length
-// transactionID is being used to monitor the transaction if it occurs once or twice a second/hour
+// there are 1 active transactions with only 2 available teller
+//
